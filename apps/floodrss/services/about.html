@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>About | FloodRSS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&family=Open+Sans:wght@500&family=Lilita+One&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Open Sans', 'Nanum Gothic', sans-serif;
+      background-color: #f5f8fb;
+      color: #222;
+      overflow-x: hidden;
+    }
+
+    /* ===== Floating Menu ===== */
+    .menu {
+      position: fixed;
+      top: 20px;
+      right: 15px;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      padding: 4px 6px;
+      z-index: 2000;
+    }
+
+    .menu ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .menu ul li a img {
+      height: 28px;
+      transition: transform 0.25s ease;
+    }
+
+    .menu ul li a img:hover {
+      transform: scale(1.2);
+    }
+
+    /* ===== Hero Section ===== */
+    .hero {
+      background-color: #205493;
+      color: white;
+      padding: 35px 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* ===== Container ===== */
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+      background: #fff;
+      padding: 40px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      border-radius: 10px;
+    }
+
+    .content-section {
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      color: #205493;
+      font-size: 20px;
+      margin-top: 30px;
+      margin-bottom: 10px;
+      border-left: 4px solid #205493;
+      padding-left: 10px;
+    }
+
+    p {
+      line-height: 1.7;
+      font-size: 15px;
+      color: #333;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 15px auto;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .button-link {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 10px;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+
+    .button-link:hover {
+      background-color: #45a049;
+    }
+
+    /* ===== Video Container ===== */
+    #videoContainer {
+      display: none;
+      text-align: center;
+      padding-top: 20px;
+      position: relative;
+    }
+
+    #closeBtn {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background: #e60000;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      transition: background 0.2s ease;
+    }
+
+    #closeBtn:hover {
+      background: #c00000;
+    }
+
+    iframe {
+      width: 100%;
+      max-width: 560px;
+      height: 315px;
+      border: none;
+      border-radius: 8px;
+    }
+
+    /* ===== Footer ===== */
+    .footer {
+      background-color: #205493;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-size: 14px;
+      margin-top: 50px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+      }
+      .hero {
+        font-size: 20px;
+        padding: 25px 10px;
+      }
+      h2 {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ===== Floating Menu ===== -->
+  <div class="menu">
+    <ul>
+      <li title="Home"><a href="../index.html"><img src="../images/icons/home2.png" alt="home"></a></li>
+      <li title="Details"><a href="about.html"><img src="../images/icons/about2.png" alt="about"></a></li>
+      <li title="Database"><a href="dataservice.html"><img src="../images/icons/database1.png" alt="data"></a></li>
+      <li title="Statistics"><a href="stat.html"><img src="../images/icons/statistics1.png" alt="stats"></a></li>
+    </ul>
+  </div>
+
+  <!-- ===== Hero Section ===== -->
+  <div class="hero">
+    Flood Vulnerability Mapping Using Fuzzy Geospatial Technique
+  </div>
+
+  <!-- ===== Main Content ===== -->
+  <div class="container">
+    <div class="content-section">
+      <h2>Overview</h2>
+      <p>
+        This project enhances flood risk assessment using fuzzy logic integrated with geospatial analysis.
+        It produces detailed vulnerability maps by analyzing topography, hydrology, land use, and socio-economic
+        variables. The method is adaptive and better represents the uncertainties in flood dynamics.
+      </p>
+    </div>
+
+    <div class="content-section">
+      <h2>Objective</h2>
+      <p>
+        Our goal is to create dynamic flood-prone area maps that support policymakers, urban planners,
+        and emergency responders with reliable data for proactive decisions.
+      </p>
+    </div>
+
+    <div class="content-section">
+      <h2>Dataset</h2>
+      <p>This project uses 10 key parameters to analyze flood susceptibility.</p>
+      <img src="../images/docs/dataset.png" alt="Dataset Parameters">
+    </div>
+
+    <div class="content-section">
+      <h2>Methodology</h2>
+      <p>
+        Using fuzzy logic, we assign probabilities to geographical zones based on uncertain or overlapping input data.
+        This boosts the accuracy of predictions and allows more nuanced decisions.
+      </p>
+      <h3 style="color:#205493;">Fuzzy Logic using GIS</h3>
+      <p>
+        Fuzzy logic enhances GIS capabilities to model ambiguous data, essential for spatial analysis in flood mapping.
+      </p>
+      <p><strong>Fuzzy Weights for Parameters:</strong></p>
+      <img src="../images/docs/fuzzyweight.png" alt="Fuzzy Weights">
+
+      <button class="button-link" onclick="showVideo()">▶ More about Fuzzy Logic</button>
+      <div id="videoContainer">
+        <button id="closeBtn" onclick="hideVideo()">×</button>
+        <iframe src="https://www.youtube.com/embed/LsSaUGzHngg" title="Fuzzy Logic Explained"></iframe>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Impact</h2>
+      <p>
+        This project aids disaster preparedness, promotes sustainable development, and protects vulnerable
+        communities through data-driven flood forecasting.
+      </p>
+      <a href="https://www.tandfonline.com/doi/full/10.1080/15715124.2023.2216936"
+         target="_blank" class="button-link">📖 Read the Journal Paper</a>
+    </div>
+  </div>
+
+  <!-- ===== Footer ===== -->
+  <div class="footer">
+    &copy; 2024 FloodRSS | University of Iowa Hydroinformatics Lab
+  </div>
+
+  <script>
+    function showVideo() {
+      document.getElementById('videoContainer').style.display = 'block';
+    }
+
+    function hideVideo() {
+      document.getElementById('videoContainer').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

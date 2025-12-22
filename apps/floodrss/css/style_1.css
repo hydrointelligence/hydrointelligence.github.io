@@ -1,0 +1,1018 @@
+:root {
+  --bg-color: #ffffff;
+  --ol-color: #555555;
+  --hl-color: #337bcb;
+  --b-color: #800000;
+}
+
+@font-face {
+  font-family: PFDinTextCompProMedium, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+#map {
+  height: 100%;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 5;
+  margin: 0;
+  position: absolute;
+  padding-top: 10px;
+}
+
+.map-overlay {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  padding: 5px 10px;
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  font-size: 20px;
+  font-weight: bold;
+  color: #900;
+  z-index: 1000;
+}
+
+
+
+.menu {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1010;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  padding: 5px 10px;
+}
+
+.menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.menu li {
+  padding: 5px 10px;
+  white-space: nowrap;
+}
+
+.menu a {
+  text-decoration: none;
+  color: #333;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.menu select {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: white;
+}
+
+.menu a:hover,
+.menu select:hover {
+  background-color: #f2f2f2;
+}
+
+
+.body {
+ font-family: 'Open Sans', sans-serif;
+ }
+ 
+ #map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0; /* Remove this line — it’s what causes the crop */
+  z-index: 5;
+}
+
+
+
+.popup {
+  display: none;
+  position: fixed;
+  font-size: 16px;
+  top: 50%;
+  left: 80%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  background-color: #f9f9f9;
+  border: 1px solid #dcdcdc;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1050;
+  width: 250px;
+  border-radius: 5px;
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  box-sizing: border-box;
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.popup h1,
+.popup h2,
+.popup h3,
+.popup p {
+  margin-top: 0;
+  color: #333;
+}
+
+/*.popup button {
+  background-color: #e34a33;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin-top: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+}*/
+
+.popup button:hover {
+  background-color: #e34a33;
+}
+
+
+/* Adjustments for input labels and ranges */
+.popup label {
+  font-size: 11px; /* Reduce label font size */
+/*  margin-bottom: 5px;*/
+}
+
+.popup h3 {
+  font-size: 14px; /* Reduce header font size */
+  margin-top: 0; /* Reduce top margin */
+  margin-bottom: 10px; /* Adjust bottom margin */
+}
+
+.popup h4 {
+  font-size: 13px; /* Reduce sub-header font size */
+  margin-top: 10px; /* Adjust top margin */
+  margin-bottom: 5px; /* Adjust bottom margin */
+}
+
+
+
+/* Cool background for Physical Factors */
+.physical-header {
+    background-color: #337bcb; /* Cool green background */
+    color: white; /* Text color */
+    padding: 5px 10px; /* Padding */
+    border-radius: 5px; /* Rounded corners */
+    margin-top: 10px; /* Space above */
+    margin-bottom: 10px; /* Space below */
+}
+
+/* Cool background for Social Factors */
+.social-header {
+    background-color: #337bcb; /* Cool blue background */
+    color: white; /* Text color */
+    padding: 5px 10px; /* Padding */
+    border-radius: 5px; /* Rounded corners */
+    margin-top: 10px; /* Space above */
+    margin-bottom: 10px; /* Space below */
+}
+
+
+
+/* Additional styling for the options under the main checkboxes */
+.checkbox-container {
+  margin: 20px;
+}
+
+#additional-checkboxes,
+#socio-economic-checkboxes {
+  margin-left: 20px;
+  max-height: 0;
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 0;
+  border-radius: 5px;
+  background-color: #d7d3d3;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  margin: 0;
+}
+
+#additional-checkboxes.expanded,
+#socio-economic-checkboxes.expanded {
+  margin-left: 10px;
+  max-height: none;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  transition: none;
+}
+
+.hidden {
+  display: none;
+}
+
+label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  margin: 5px 0;
+  padding-bottom: 5px 0;
+}
+
+/* Checkbox input styling */
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.popup {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/*.popup .close {
+  float: right;
+  cursor: pointer;
+  font-size: 16px;
+  display: block;
+}
+*/
+.slider-container {
+  margin-top: 10px;
+}
+
+.slider {
+  width: 80%;
+  margin: 0 auto;
+}
+
+h4.physical-header, h4.social-header {
+    margin-top: 11px;
+}
+
+@font-face {
+  font-family: PFDinTextCompPro;
+  src: url('../fonts/PFDinTextCompPro-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: PFDinTextCompPro;
+  src: url('../fonts/PFDinTextCompPro-Medium.woff2') format('woff2');
+  font-weight: 500; /* medium */
+  font-style: normal;
+}
+/* usage */
+html, body {
+  font-family: PFDinTextCompPro, "Segoe UI", Helvetica, Arial, sans-serif;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+#info-container {
+  position: absolute;
+  top: calc(100% + 45px);
+  left: 20px;
+  z-index: 99;
+  width: 240px;
+  border: 1px solid var(--ol-color);
+  border-top: none;
+}
+
+#info-window {
+  display: none;
+  position: relative;
+  background: #fff;
+  border-top: none;
+  font-size: 16px;
+  width: 220px;
+  padding: 5px 10px 5px 10px;
+}
+
+#ltw-drought-info {
+  height: auto !important;
+  min-height: auto !important;
+  max-height: none !important;
+}
+
+#iw-box {
+  display: flex;
+  flex-direction: column;
+}
+
+#iw-box .title {
+  float: left;
+  display: inline;
+  padding-top: 4px;
+}
+
+#iw-box .title span {
+  font-size: 16px;
+  padding: 5px 1px 5px 10px;
+  background: var(--hl-color);
+  border-right: calc(10px + 0.6em) solid var(--hl-color);
+  color: white;
+  overflow: hidden;
+  width: auto;
+  line-height: 24px;
+  height: 23px;
+  text-align: left;
+  margin-left: -10px;
+}
+
+#iw-box .item {
+  margin-left: auto;
+  float: right;
+  font-size: 15px;
+  color: #fff;
+  padding: 3px 7px;
+  background: var(--ol-color);
+  clear: both;
+  text-decoration: none;
+  margin-right: -10px;
+}
+
+#iw-box .desc {
+  display: flex;
+  flex-direction: column;
+  margin-top: 32px;
+  font-size: 15px;
+  line-height: 23px;
+  color: var(--ol-color);
+  font-weight: 400;
+}
+
+#iw-box .des {
+  display: flex;
+  flex-direction: column;
+  font-size: 15px;
+  line-height: 23px;
+  color: var(--ol-color);
+  font-weight: 400;
+}
+
+#iw-box .des span {
+  font-weight: normal;
+}
+
+#iw-box .desc b {
+  color: var(--b-color);
+}
+
+#iw-content b {
+  color: var(--b-color);
+  font-weight: normal;
+}
+
+#iw-content .gnss {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 100;
+}
+
+.close-btn {
+  float: right;
+  cursor: pointer;
+  right: 5px;
+  position: absolute;
+}
+
+.close-btn:hover {
+  color: var(--b-color);
+}
+
+#loading {
+  display: none;
+  position: absolute;
+  height: 180px;
+  width: 280px;
+  z-index: 30;
+  background: #fff;
+  padding: 5px;
+  border: 0 solid #000;
+  top: 300px;
+  left: 50%;
+  margin-left: -140px;
+  overflow: hidden;
+  font-family: "Gill Sans MT", "Lucida Grande", "trebuchet ms", "Lucida Sans", "Lucida Sans Unicode", "Segoe UI", Verdana, sans-serif;
+  line-height: 29px;
+  font-size: 17px;
+}
+
+#loading a {
+  float: none;
+  margin: 0;
+}
+
+#wellgraph {
+  background-color: cadetblue;
+  text-align: left;
+  position: absolute;
+  border: 1px solid #000;
+  padding: 5px 0 0 0;
+  z-index: 99;
+  left: 20px;
+  width: 240px;
+}
+
+.fim-icon {
+  background-color: none;
+  margin-left: auto;
+  width: 30px;
+  height: 30px;
+  z-index: 1000;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.fim-icon:hover {
+  opacity: 0.5;
+}
+
+.header {
+  font-size: 25px;
+  font-weight: 700;
+  padding: 0 20px 40px 20px;
+  max-width: 460px;
+  color: #008;
+  text-align: left;
+}
+
+.header-title a {
+  color: #ffffff;
+  font-size: 30px;
+  text-decoration: none;
+  font-family: 'Audiowide', sans-serif;
+  font-weight: 700; /* makes it look like a logo, not regular text */
+  letter-spacing: 3px; /* subtle spacing gives it a refined logo feel */
+  text-shadow: 1.5px 1.5px 3px rgba(0, 0, 0, 0.25);
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.header-title a:hover {
+  color: rgb(11, 53, 110);
+}
+
+.block-check {
+  position: absolute;
+  right: 125px;
+  top: 13px;
+}
+
+#wq-check-div {
+  font-size: 16px;
+}
+
+select {
+  border: 1px solid #555;
+  font-size: 12px;
+  font-weight: lighter;
+  color: #000;
+  width: 100%;
+  padding: 4.5px 5px 4px 5px;
+  background: #eee;
+}
+
+.water-quality-container {
+  margin-top: 5px;
+}
+
+.flood-map-container {
+  margin-top: 5px;
+}
+
+label {
+  
+  font-weight: normal;
+  margin-bottom: 5px;
+}
+
+#statContainer {
+  font-size: 12px;
+  background-color: white;
+  position: absolute;
+  border: 1px solid #000;
+  top: 0;
+  left: 33%;
+  right: 52%;
+  padding: 5px 10px 10px 10px;
+  z-index: 999;
+  margin: -1px 20px 0 0;
+  width: 550px;
+  text-align: center;
+  visibility: hidden;
+}
+
+#statContainer h2 {
+  font-size: 16px;
+  margin: 3px;
+}
+
+#statContainer h3 {
+  font-size: 10px;
+  margin: 2px 2px 5px 2px;
+}
+
+#statContainer button {
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+}
+
+#statContainer button .fa-solid {
+  font-size: 20px;
+  margin-right: 5px;
+}
+
+#statContainer button:hover {
+  background-color: #0056b3;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #000;
+}
+
+.data-table th,
+.data-table td {
+  padding: 8px;
+  text-align: center;
+  border: 1px solid #000;
+}
+
+.data-table th {
+  background-color: #f2f2f2;
+}
+
+.data-table td:first-child {
+  text-align: left;
+}
+
+#inner-container {
+  position: relative;
+}
+
+.header2 {
+  font-size: 17px;
+  font-weight: 700;
+  padding-left: 5px;
+  color: #800;
+  margin-bottom: 5px;
+}
+
+.header2 span {
+  color: black;
+}
+
+.header3 {
+  float: left;
+  font-size: 14px;
+  font-weight: 600;
+  padding-left: 10px;
+  color: black;
+}
+
+.header4 {
+  float: left;
+  font-size: 12px;
+  font-weight: 400;
+  padding-left: 5px;
+  color: black;
+}
+
+.tableContainer {
+  padding-left: 10px;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.headerTable {
+  float: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: black;
+}
+
+.icon {
+  margin-right: 5px;
+}
+
+.headerLegend {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0px 2px 2px 2px;
+}
+
+#wq-close-button {
+  position: absolute;
+  top: -4px;
+  color: #000;
+  right: 5px;
+  cursor: pointer;
+  font-size: 21px;
+}
+
+#drought-toggle-window,
+#layer-toggle-window {
+  font-size: 16px;
+  background-color: ghostwhite;
+  position: relative;
+  border-bottom: none;
+  border-top: none;
+  padding: 0px 10px 5px 10px;
+  width: 220px;
+  line-height: 25px;
+}
+
+.cbox-next {
+  margin: 10px 0 0 0 !important;
+}
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin-top: 4px;
+  height: 14px;
+  width: 14px;
+  background-color: var(--bg-color);
+  border: 2px var(--ol-color) solid;
+  box-shadow: inset 0px 0px 0px 2px var(--bg-color);
+}
+
+/* Style for checkbox container */
+
+.cbox {
+  display: flex;
+  align-items: center;
+  font-weight: normal;
+  display: block;
+  position: relative;
+  padding-left: 30px;
+  margin: 2px;
+  cursor: pointer;
+  font-size: 13px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.disabled {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #999;
+  cursor: not-allowed;
+}
+
+.disabled input[type="checkbox"] {
+  cursor: not-allowed;
+}
+
+.disabled .checkmark {
+  border-color: #999;
+}
+
+.cbox.disabled:hover::after {
+  content: attr(title);
+  position: absolute;
+  background-color: #333;
+  color: #fff;
+  font-size: 10px;
+  padding: 5px;
+  border-radius: 5px;
+  z-index: 1;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.cbox:hover input ~ .checkmark,
+.cbox-group:hover input ~ .checkmark2 {
+  background-color: #ccc;
+}
+
+.cbox input:checked ~ .checkmark,
+.cbox-group input:checked ~ .checkmark2 {
+  background-color: #2196f3;
+}
+
+.cbox input[type="checkbox"],
+.cbox-group input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.cbox img {
+  max-height: 24px;
+  width: auto;
+  height: auto;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  right: 1rem;
+}
+
+#ltw-flood-maps-items,
+#ltw-flood-extent-items,
+#ltw-flood-extent-current-items,
+#ltw-flood-velocity-items .cbox {
+  margin: 2px 2px 2px 5px;
+}
+
+#iw-moreinfo {
+  display: flex;
+  justify-content: space-between;
+}
+
+#iw-moreinfo button {
+  --bg-color: #ffffff;
+  --hl-color: #337bcb;
+  --b-color: #800000;
+  font-size: 14px;
+  color: #000;
+  margin: 5px 0 5px 0;
+  width: 0px;
+  padding: 5px;
+  background: #e7e7e7;
+  border: none;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+#drought-toggle-window .title,
+#layer-toggle-window .title {
+  float: left;
+  display: inline;
+  padding-top: 4px;
+}
+
+#drought-toggle-window .title span,
+#layer-toggle-window .title span {
+  font-size: 17px;
+  font-weight: bold;
+  padding: 3px 1px 5px 10px;
+  background: var(--hl-color);
+  border-right: calc(10px + 0.1em) solid var(--hl-color);
+  color: white;
+  overflow: hidden;
+  width: auto;
+  line-height: 24px;
+  height: 23px;
+  text-align: left;
+  margin-left: -10px;
+}
+
+#ltw-drought-info,
+#ltw-water-quality,
+#ltw-well-info,
+#ltw-flood-maps {
+  display: flex;
+  flex-direction: column;  /* was probably larger before, reduce here */
+  padding: 10px;
+}
+
+
+
+#ltw-drought-info-items,
+#ltw-well-info-items,
+#ltw-water-quality-items {
+  margin-top: 5px;
+}
+
+#legend_con_dem,
+#legend_con_riverdistImage,
+#legend_con_lulcImageToggle,
+#legend_con_soilImageToggle,
+#legend_con_slopeImageToggle,
+#legend_con_population,
+#legend_con_income,
+#legend_con_road,
+#legend_con_renter,
+#legend_con_childAged,
+#legend_con_physicalLayer,
+#legend_con_socialLayer,
+#legend_con_combinedLayer{
+  background-color: var(--bg-color);
+  border: 1px var(--ol-color) solid;
+  right: -1px;
+  width: 145px;
+  padding: 10px;
+  position: fixed;
+  bottom: 150px;
+  line-height: 1.5;
+  z-index: 99;
+  font-size: 14px;
+}
+
+.legend-entry {
+  display: flex;
+  align-items: center;
+  margin: 1px;
+}
+
+.color-block {
+  width: 10px;
+  height: 10px;
+  margin-right: 5px;
+  border: 1px solid #000;
+}
+
+.legend-label {
+  font-size: 12px;
+  margin-left: 5px;
+}
+
+
+#PopulationLegend {
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 4px;
+}
+
+.legend-entry {
+  display: flex;
+  align-items: center;
+  margin: 1px;
+}
+
+.color-block,
+.color-circle {
+  width: 10px;
+  height: 10px;
+  margin-right: 5px;
+  border: 1px solid #000;
+}
+
+.color-circle {
+  border-radius: 50%;
+}
+
+.legend-label {
+  font-size: 12px;
+}
+
+#infobox {
+  font-family: "Open Sans", sans-serif;
+  font-size: 13px;
+  background-color: #ffffff;
+  top: 0;
+  right: 0;
+  padding: 5px;
+  z-index: 999;
+  min-width: 250px;
+  line-height: 28px;
+  overflow: auto;
+  max-height: 280px;
+}
+
+#infobox .title {
+  color: #337bcb;
+  font-size: 17px;
+  font-weight: bolder;
+  margin: 4px 0px;
+}
+
+#infobox .type {
+  color: #800;
+  font-size: 15px;
+  font-weight: bolder;
+  margin: 4px 0px;
+}
+
+#slide p {
+  margin: 0;
+  font-size: 12px;
+  color: #e34a33;
+}
+
+.slider {
+  width: 100%;
+  margin: 0 auto;
+}
+
+#slider-container {
+  margin: 10px 0;
+ justify-content: center;
+}
+
+#slider-info {
+  font-size: 8px;
+  justify-content: center;
+}
+
+#slider-info .box {
+  margin: 5px 10px;
+}
+
+#slide .cbox {
+  text-align: justify;
+}
+
+#calculate-button1 {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 8px;
+  outline: none;
+  transition: background-color 0.3s;
+}
+
+#calculate-button1:hover {
+  background-color: #36688D;
+  color: #FFFFFF;
+}
+
+#calculate-button1 {
+  display: inline-block;
+}
+
+
+#calculate-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 8px;
+  outline: none;
+  transition: background-color 0.3s;
+}
+
+#calculate-button1:hover {
+  background-color: #36688D;
+  color: #FFFFFF;
+}
+
+#calculate-button1 {
+  display: inline-block;
+}
+
+
+
+.uihi-logo {
+  position: fixed;
+  bottom: 13px;
+  background-color: var(--bg-color);
+  right: 60px;
+  padding: 3px;
+  text-align: center;
+  border: 1px var(--ol-color) solid;
+  z-index: 99;
+}
+
+.uihi-logo img {
+  width: 78px;
+  height: 69px;
+}
+
+/* Hide the "Keyboard Shortcuts", "Terms of Use", and "Report a problem" buttons */
+.gmnoprint[aria-label="Keyboard shortcuts"],
+.gmnoprint a[href*="terms"],
+.gmnoprint a[href*="report"] {
+    display: none !important;
+}
+
+/* Optionally hide all Google branding at bottom-right (use carefully) */
+.gmnoprint, .gm-style-cc {
+    display: none !important;
+}

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Statistics | FloodRSS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&family=Open+Sans:wght@500&family=Lilita+One&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="//code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Open Sans', 'Nanum Gothic', sans-serif;
+            background-color: #f5f8fb;
+            color: #222;
+        }
+    
+        /* Floating Menu */
+        .menu {
+            position: fixed;
+            top: 22px;
+            right: 10px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            padding: 2px 2px;
+            z-index: 10; /* ✅ Lowered so overlay appears above */
+        }
+        .menu ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .menu ul li a img {
+            height: 28px;
+            transition: transform 0.2s ease;
+        }
+        .menu ul li a img:hover {
+            transform: scale(1.2);
+        }
+    
+        .header {
+            font-family: 'Calibri', cursive;
+            font-size: 34px;
+            font-weight: 700;
+            color: #1f77b4;
+            padding: 70px 0 10px 40px;
+        }
+    
+        .selector-container {
+            text-align: center;
+            margin: 40px 0;
+        }
+    
+        select {
+            width: 320px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+            color: #333;
+            font-family: 'Open Sans', sans-serif;
+            transition: all 0.3s ease;
+            background-color: white;
+        }
+        select:hover, select:focus {
+            border-color: #1f77b4;
+            box-shadow: 0 0 5px rgba(31, 119, 180, 0.3);
+            outline: none;
+        }
+    
+        /* Overlay for chart popup */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100; /* ✅ Above menu now */
+        }
+    
+        #chartContainer {
+            width: 85%;
+            height: 85vh;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 30px;
+        }
+    
+        /* ✅ Enlarged and improved Close Button */
+        .close-btn {
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 36px; /* Bigger */
+            font-weight: bold;
+            color: #444;
+            background: #f9f9f9;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s ease;
+            z-index: 101; /* Always on top */
+        }
+        .close-btn:hover {
+            background: #e74c3c;
+            color: #fff;
+            border-color: #e74c3c;
+            transform: scale(1.05);
+        }
+    
+        #chartDiv {
+            width: 100%;
+            height: 100%;
+            min-height: 500px;
+        }
+    
+        .placeholder {
+            text-align: center;
+            color: #777;
+            font-size: 18px;
+            margin-top: 120px;
+        }
+    </style>
+    
+
+    <script>
+        let csvData = [];
+
+        // Function to calculate vulnerability level from both_indicator (matching fetch_data.php logic)
+        function calculateVulnerabilityLevel(bothIndicator) {
+            const value = parseFloat(bothIndicator);
+            if (value < 1.8) {
+                return 'Very Low';
+            } else if (value >= 1.8 && value < 2.0) {
+                return 'Low';
+            } else if (value >= 2.0 && value < 2.2) {
+                return 'Moderate';
+            } else if (value >= 2.2 && value < 2.5) {
+                return 'High';
+            } else {
+                return 'Very High';
+            }
+        }
+
+        // Function to parse CSV text into array of objects
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim() !== '');
+            if (lines.length === 0) return [];
+
+            // Parse header
+            const headers = lines[0].split(',').map(h => h.trim());
+
+            // Parse data rows
+            const data = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = [];
+                let currentValue = '';
+                let inQuotes = false;
+
+                for (let j = 0; j < lines[i].length; j++) {
+                    const char = lines[i][j];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(currentValue.trim());
+                        currentValue = '';
+                    } else {
+                        currentValue += char;
+                    }
+                }
+                values.push(currentValue.trim()); // Add last value
+
+                if (values.length === headers.length) {
+                    const rowObj = {};
+                    headers.forEach((header, index) => {
+                        rowObj[header] = values[index] || '';
+                    });
+                    // Calculate vulnerability level
+                    rowObj.vulnerability_level = calculateVulnerabilityLevel(rowObj.both_indicator || 0);
+                    data.push(rowObj);
+                }
+            }
+
+            return data;
+        }
+
+        // Function to calculate statistics from CSV data
+        function calculateStatistics(column) {
+            // Allowed columns for safety
+            const allowedColumns = ['dem_m', 'riverdist', 'slope_deg', 'popden_sqk', 'medinc', 'pecb5a65', 'renters'];
+            if (!allowedColumns.includes(column)) {
+                return { error: 'Invalid column selection.' };
+            }
+
+            // Group data by vulnerability level and calculate averages
+            const grouped = {};
+            const levels = ['Very Low', 'Low', 'Moderate', 'High', 'Very High'];
+
+            // Initialize groups
+            levels.forEach(level => {
+                grouped[level] = { sum: 0, count: 0 };
+            });
+
+            // Process each row
+            csvData.forEach(row => {
+                const vulnLevel = row.vulnerability_level;
+                const value = parseFloat(row[column]);
+                
+                if (!isNaN(value) && grouped[vulnLevel]) {
+                    grouped[vulnLevel].sum += value;
+                    grouped[vulnLevel].count += 1;
+                }
+            });
+
+            // Calculate averages and format response
+            const result = levels.map(level => {
+                const avg = grouped[level].count > 0 
+                    ? Math.round((grouped[level].sum / grouped[level].count) * 100) / 100 
+                    : 0;
+                return {
+                    label: level,
+                    value: avg
+                };
+            });
+
+            return result;
+        }
+
+        google.charts.load('current', { 'packages': ['corechart'] });
+        google.charts.setOnLoadCallback(initializeChart);
+
+        function initializeChart() {
+            // Load CSV data on page load
+            fetch('../data/cr_dataset.csv')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to load CSV file');
+                    }
+                    return response.text();
+                })
+                .then(csvText => {
+                    csvData = parseCSV(csvText);
+                })
+                .catch(error => {
+                    console.error('Error loading CSV:', error);
+                    alert('Error loading CSV file: ' + error.message);
+                });
+
+            document.getElementById('Display_stat').addEventListener('change', function () {
+                const selectedColumn = this.value;
+                if (selectedColumn) {
+                    fetchDataAndDrawChart(selectedColumn);
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                const chartDiv = document.getElementById('chartDiv');
+                if (chartDiv && chartDiv.dataset.column) {
+                    fetchDataAndDrawChart(chartDiv.dataset.column);
+                }
+            });
+        }
+
+        function fetchDataAndDrawChart(selectedColumn) {
+            if (csvData.length === 0) {
+                alert('Data is still loading. Please wait a moment and try again.');
+                return;
+            }
+
+            const response = calculateStatistics(selectedColumn);
+            
+            if (response.error) {
+                alert(response.error);
+                return;
+            }
+
+            // Ensure all 5 levels always appear
+            const levels = ['Very Low', 'Low', 'Moderate', 'High', 'Very High'];
+            const mapped = levels.map(level => {
+                const found = response.find(item => item.label === level);
+                return found ? found : { label: level, value: 0 };
+            });
+
+            drawBarChart(mapped, selectedColumn);
+        }
+
+        function drawBarChart(chartData, selectedColumn) {
+            const axisLabels = {
+                'dem_m': 'Elevation (m)',
+                'riverdist': 'River Distance (m)',
+                'slope_deg': 'Slope (°)',
+                'popden_sqk': 'Population Density (/km²)',
+                'medinc': 'Median Income ($)',
+                'pecb5a65': '% Vulnerable Age',
+                'renters': '% Renters'
+            };
+
+            const data = new google.visualization.DataTable();
+            data.addColumn('string', 'Vulnerability Level');
+            data.addColumn('number', axisLabels[selectedColumn]);
+            data.addColumn({type: 'string', role: 'annotation'});
+
+            chartData.forEach(item => {
+                data.addRow([item.label, item.value, item.value.toString()]);
+            });
+
+            const options = {
+                title: 'Average ' + axisLabels[selectedColumn] + ' by Vulnerability Level',
+                titleTextStyle: {
+                    color: '#1f77b4',
+                    fontSize: 22,
+                    bold: true
+                },
+                hAxis: {
+                    title: axisLabels[selectedColumn],
+                    titleTextStyle: { color: '#1f77b4', fontSize: 16, bold: true },
+                    minValue: 0
+                },
+                vAxis: {
+                    title: 'Vulnerability Level',
+                    titleTextStyle: { color: '#1f77b4', fontSize: 16, bold: true }
+                },
+                legend: { position: 'none' },
+                chartArea: { left: 150, top: 80, width: '70%', height: '75%' },
+                bar: { groupWidth: '65%' },
+                animation: {
+                    startup: true,
+                    duration: 1000,
+                    easing: 'out'
+                },
+                colors: ['#1f77b4']
+            };
+
+            const chartDiv = document.getElementById('chartDiv');
+            chartDiv.dataset.column = selectedColumn;
+
+            const chart = new google.visualization.BarChart(chartDiv);
+            chart.draw(data, options);
+
+            // ✅ Force redraw after layout settles to prevent cropped chart
+            setTimeout(() => chart.draw(data, options), 200);
+
+            document.getElementById('overlay').style.display = 'flex';
+        }
+
+        function hideChart() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('Display_stat').value = '';
+        }
+    </script>
+</head>
+
+<body>
+    <div class="menu">
+        <ul>
+            <li title="home"><a href="../index.html"><img src="../images/icons/home2.png" alt="home"></a></li>
+            <li title="Details"><a href="about.html"><img src="../images/icons/about2.png" alt="about"></a></li>
+            <li title="Database"><a href="dataservice.html"><img src="../images/icons/database1.png" alt="data"></a></li>
+            <li title="Statistics"><a href="stat.html"><img src="../images/icons/statistics1.png" alt="stat"></a></li>
+        </ul>
+    </div>
+
+    <div class="header">Statistical Insights</div>
+
+    <div class="selector-container">
+        <select id="Display_stat">
+            <option value="">-- Select Statistical Parameter --</option>
+            <option value="dem_m">Elevation</option>
+            <option value="riverdist">River Distance</option>
+            <option value="slope_deg">Slope</option>
+            <option value="popden_sqk">Population Density</option>
+            <option value="medinc">Median Income</option>
+            <option value="pecb5a65">Vulnerable Age Group</option>
+            <option value="renters">Renters</option>
+        </select>
+    </div>
+
+    <div class="placeholder">Select a parameter from the dropdown above to view chart statistics.</div>
+
+    <div id="overlay">
+        <div id="chartContainer">
+            <button class="close-btn" onclick="hideChart()">&times;</button>
+            <div id="chartDiv"></div>
+        </div>
+    </div>
+</body>
+</html>

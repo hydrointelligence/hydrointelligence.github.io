@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Data Service | FloodRSS</title>
+    <link rel="stylesheet" href="../css/style_1.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&family=Open+Sans:wght@500&family=Lilita+One&display=swap" rel="stylesheet" />
+    <script src="//code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Open Sans', 'Nanum Gothic', sans-serif;
+            background-color: #f5f8fb;
+            color: #222;
+        }
+
+        /* ---------- Floating Icon Menu (identical to index_1.html) ---------- */
+        .menu {
+            position: fixed;
+            top: 22px;
+            right: 10px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            padding: 2px 2px;
+            z-index: 1000;
+        }
+
+        .menu ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .menu ul li {
+            display: inline-block;
+        }
+
+        .menu ul li a img {
+            height: 28px;
+            width: auto;
+            transition: transform 0.2s ease;
+        }
+
+        .menu ul li a img:hover {
+            transform: scale(1.2);
+        }
+
+        /* ---------- Page Title ---------- */
+        .header {
+            font-family: 'Calibri', cursive;
+            font-size: 34px;
+            color: #1f77b4;
+            padding: 70px 0 10px 40px;
+        }
+
+        /* ---------- Layout ---------- */
+        .container {
+            display: flex;
+            flex-direction: row;
+            gap: 25px;
+            padding: 20px 40px 60px 40px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+        }
+
+        .form-card {
+            flex: 1;
+            min-width: 280px;
+            height: fit-content;
+        }
+
+        .table-card {
+            position: relative;
+            flex: 3 1 auto;
+            overflow-x: auto;
+            overflow-y: auto;
+            scrollbar-gutter: stable both-edges;
+            padding-bottom: 60px;
+            max-height: none;
+            height: auto;
+        }
+
+        /* Label styling */
+        label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Text input fields */
+        input[type="text"] {
+            width: 94%;
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        /* Submit button */
+        input[type="submit"], button[type="submit"] {
+            background-color: #1f77b4;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        input[type="submit"]:hover, button[type="submit"]:hover {
+            background-color: #166298;
+        }
+
+        /* ---------- Table ---------- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        table th {
+            background-color: #1f77b4;
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            padding: 8px;
+        }
+
+        table td {
+            text-align: center;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f8f8f8;
+        }
+
+        table tr:hover {
+            background-color: #eaf3ff;
+        }
+
+        /* Download button */
+        button.download-btn,
+        a.download-btn {
+            background-color: #1f77b4;
+            color: white;
+            font-weight: 600;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: inline-block;
+            margin-top: 10px;
+            text-decoration: none;
+        }
+
+        button.download-btn:hover,
+        a.download-btn:hover {
+            background-color: #166298;
+        }
+
+        th {
+            background: #1f77b4;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 12px;
+        }
+
+        tr:nth-child(even) {
+            background: #f4f7fa;
+        }
+
+        /* ---------- Floating Download Button ---------- */
+        .download-button {
+            position: absolute;
+            bottom: -38px;
+            right: 915px;
+            background: none;
+        }
+        .download-button img {
+            height: 150px;
+            width: auto;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .download-button img:hover {
+            transform: scale(1.08);
+        }
+
+        .error-message {
+            color: #d32f2f;
+            padding: 10px;
+            background-color: #ffebee;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top floating menu -->
+    <div class="menu">
+        <ul>
+            <li title="home"><a href="../index.html"><img src="../images/icons/home2.png" alt="home"></a></li>
+            <li title="Details"><a href="about.html"><img src="../images/icons/about2.png" alt="about"></a></li>
+            <li title="Database"><a href="dataservice.html"><img src="../images/icons/database1.png" alt="data"></a></li>
+            <li title="Statistics"><a href="stat.html"><img src="../images/icons/statistics1.png" alt="stat"></a></li>
+        </ul>
+    </div>
+
+    <div class="header">Data Service</div>
+
+    <div class="container">
+        <!-- Query form -->
+        <div class="card form-card">
+            <h3 style="margin-bottom:15px;color:#1f77b4;">Query Dataset</h3>
+            <form id="searchForm">
+                <label for="vulnerability_level">Vulnerability Level</label>
+                <input type="text" id="vulnerability_level" name="vulnerability_level"
+                       placeholder="e.g. High, Moderate, Very Low"
+                       value="">
+
+                <label for="limit">Limit</label>
+                <input type="text" id="limit" name="limit" value="10">
+
+                <button type="submit">Search</button>
+            </form>
+        </div>
+
+        <!-- Data table -->
+        <div class="card table-card">
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+            <div id="tableContainer"></div>
+
+            <!-- Download Button -->
+            <div class="download-button" title="Download CSV">
+                <img src="../images/icons/download-button1.png" alt="Download CSV" onclick="downloadTableAsCSV()">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let csvData = [];
+        let headers = [];
+
+        // Function to calculate vulnerability level from both_indicator
+        function calculateVulnerabilityLevel(bothIndicator) {
+            const value = parseFloat(bothIndicator);
+            if (value < 1.2) {
+                return 'Very Low';
+            } else if (value >= 1.2 && value < 1.4) {
+                return 'Low';
+            } else if (value >= 1.4 && value < 1.6) {
+                return 'Moderate';
+            } else if (value >= 1.6 && value < 1.8) {
+                return 'High';
+            } else {
+                return 'Very High';
+            }
+        }
+
+        // Function to parse CSV text into array of objects
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim() !== '');
+            if (lines.length === 0) return { headers: [], data: [] };
+
+            // Parse header
+            headers = lines[0].split(',').map(h => h.trim());
+
+            // Parse data rows
+            const data = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = [];
+                let currentValue = '';
+                let inQuotes = false;
+
+                for (let j = 0; j < lines[i].length; j++) {
+                    const char = lines[i][j];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(currentValue.trim());
+                        currentValue = '';
+                    } else {
+                        currentValue += char;
+                    }
+                }
+                values.push(currentValue.trim()); // Add last value
+
+                if (values.length === headers.length) {
+                    const rowObj = {};
+                    headers.forEach((header, index) => {
+                        rowObj[header] = values[index] || '';
+                    });
+                    // Calculate vulnerability level
+                    rowObj.vulnerability_level = calculateVulnerabilityLevel(rowObj.both_indicator || 0);
+                    data.push(rowObj);
+                }
+            }
+
+            return { headers, data };
+        }
+
+        // Function to filter and display data
+        function filterAndDisplayData() {
+            const vulnerabilityLevel = document.getElementById('vulnerability_level').value.trim().toLowerCase();
+            const limit = parseInt(document.getElementById('limit').value) || 10;
+
+            // Filter data
+            let filteredData = csvData;
+            if (vulnerabilityLevel) {
+                filteredData = csvData.filter(row => {
+                    const vulnLevel = (row.vulnerability_level || '').toLowerCase();
+                    return vulnLevel.includes(vulnerabilityLevel);
+                });
+            }
+
+            // Sort by both_indicator
+            filteredData.sort((a, b) => {
+                const aVal = parseFloat(a.both_indicator || 0);
+                const bVal = parseFloat(b.both_indicator || 0);
+                return aVal - bVal;
+            });
+
+            // Apply limit
+            filteredData = filteredData.slice(0, limit);
+
+            // Display table
+            displayTable(filteredData);
+        }
+
+        // Function to display table
+        function displayTable(data) {
+            const container = document.getElementById('tableContainer');
+            
+            if (data.length === 0) {
+                container.innerHTML = '<p>No results found.</p>';
+                return;
+            }
+
+            let html = '<table>';
+            html += '<thead><tr>';
+            html += '<th>GEOID</th>';
+            html += '<th>Elevation</th>';
+            html += '<th>Slope</th>';
+            html += '<th>River Dist.</th>';
+            html += '<th>Road Dist.</th>';
+            html += '<th>Renters (%)</th>';
+            html += '<th>Pop. Density (/km²)</th>';
+            html += '<th> Age&lt;5 / &gt;=65 yr (%)</th>';
+            html += '<th>Med. Income ($)</th>';
+            html += '<th>Soil Class</th>';
+            html += '<th>Landuse Class</th>';
+            html += '<th>Physical</th>';
+            html += '<th>Social</th>';
+            html += '<th>Integrated</th>';
+            html += '<th>Vulnerability Level</th>';
+            html += '</tr></thead><tbody>';
+
+            data.forEach(row => {
+                html += '<tr>';
+                html += '<td>' + escapeHtml(row.gisjoin || '') + '</td>';
+                html += '<td>' + escapeHtml(row.dem_m || '') + '</td>';
+                html += '<td>' + escapeHtml(row.slope_deg || '') + '</td>';
+                html += '<td>' + escapeHtml(row.riverdist || '') + '</td>';
+                html += '<td>' + escapeHtml(row.roaddist || '') + '</td>';
+                html += '<td>' + escapeHtml(row.renters || '') + '</td>';
+                html += '<td>' + escapeHtml(row.popden_sqk || '') + '</td>';
+                html += '<td>' + escapeHtml(row.pecb5a65 || '') + '</td>';
+                html += '<td>' + escapeHtml(row.medinc || '') + '</td>';
+                html += '<td>' + escapeHtml(row.soil_class || '') + '</td>';
+                html += '<td>' + escapeHtml(row.lulc_class || '') + '</td>';
+                html += '<td>' + escapeHtml(row.physical_comb || '') + '</td>';
+                html += '<td>' + escapeHtml(row.social_comb || '') + '</td>';
+                html += '<td>' + escapeHtml(row.both_indicator || '') + '</td>';
+                html += '<td>' + escapeHtml(row.vulnerability_level || '') + '</td>';
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // Function to escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Function to download table as CSV
+        function downloadTableAsCSV() {
+            const csv = [];
+            const rows = document.querySelectorAll("table tr");
+            for (let i = 0; i < rows.length; i++) {
+                const row = [];
+                const cols = rows[i].querySelectorAll("td, th");
+                for (let j = 0; j < cols.length; j++) {
+                    row.push('"' + cols[j].innerText + '"');
+                }
+                csv.push(row.join(","));
+            }
+            const csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
+            const downloadLink = document.createElement("a");
+            downloadLink.download = "table_data.csv";
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+
+        // Load CSV file on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            fetch('../data/cr_dataset.csv')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to load CSV file');
+                    }
+                    return response.text();
+                })
+                .then(csvText => {
+                    const parsed = parseCSV(csvText);
+                    csvData = parsed.data;
+                    headers = parsed.headers;
+                    
+                    // Display all data initially
+                    filterAndDisplayData();
+                })
+                .catch(error => {
+                    console.error('Error loading CSV:', error);
+                    document.getElementById('errorMessage').textContent = 'Error loading CSV file: ' + error.message;
+                    document.getElementById('errorMessage').style.display = 'block';
+                });
+
+            // Handle form submission
+            document.getElementById('searchForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                filterAndDisplayData();
+            });
+        });
+    </script>
+</body>
+</html>
+

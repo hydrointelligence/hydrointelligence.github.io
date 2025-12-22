@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Referrer-Policy" content="no-referrer-when-downgrade">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <title>Fuzzy Flood Susceptibility System</title>
+    <link rel="stylesheet" href="css/style_1.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+    <script src="//code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="js/script_1.js"></script>
+    <script
+    async
+    defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7qBlY4rs6jiNPLYAHFPMT0sCxszVHy8Q&loading=async&callback=initMap"
+    ></script>
+    <script>
+        // Ensure map reinitializes if Google Maps API loads after page is already loaded
+        window.addEventListener('load', function() {
+            if (typeof google !== 'undefined' && google.maps && typeof initMap === 'function') {
+                // Check if map container exists but map is not initialized
+                const mapDiv = document.getElementById('map');
+                if (mapDiv && (!window.map)) {
+                    setTimeout(initMap, 100);
+                }
+            }
+        });
+    </script>
+    <style>
+        /* Menu styling for this page */
+        .menu {
+            position: fixed;
+            top: 22px;
+            right: 10px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px px rgba(0, 0, 0, 0.2);
+            padding: 2px 2px;
+            z-index: 1000;
+        }
+    
+        .menu ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+    
+        .menu ul li {
+            display: inline-block;
+        }
+    
+        .menu ul li a img {
+            height: 28px;
+            width: auto;
+            transition: transform 0.2s ease;
+        }
+    
+        .menu ul li a img:hover {
+            transform: scale(1.2);
+        }
+        /* ===== Hover info box styling ===== */
+        #sliderInfoBox {
+  position: fixed;
+  top: 45%;              /* slightly higher */
+  right: 35px;           /* closer to sidebar */
+  transform: translateY(-50%);
+  width: 210px;          /* smaller width */
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 8px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  padding: 10px 12px;
+  display: none;
+  font-family: 'Open Sans', sans-serif;
+  z-index: 9999;
+  transition: opacity 0.2s ease;
+}
+
+#sliderInfoBox h4 {
+  color: #205493;
+  font-size: 14px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #205493;
+  padding-bottom: 2px;
+}
+
+#sliderInfoBox p {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #333;
+}
+
+
+    </style>
+</head>
+
+<body>
+    <!-- Horizontal Icon Menu -->
+    <div class="menu">
+        <ul>
+            <li title="home"><a href="#" onclick="event.preventDefault(); loadPage('index.html'); return false;"><img src="images/icons/home2.png" alt="home" style="height: 30px;"></a></li>
+            <li title="Details"><a href="services/about.html"><img src="images/icons/about2.png" alt="about" style="height: 30px;"></a></li>
+            <li title="Database"><a href="services/dataservice.html"><img src="images/icons/database1.png" alt="data" style="height: 30px;"></a></li>
+            <li title="Statistics"><a href="services/stat.html"><img src="images/icons/statistics1.png" alt="data" style="height: 30px;"></a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content Area - ALL MAP CONTENT GOES HERE -->
+    <div id="main-content">
+        <!-- All your map content should be inside this div -->
+        
+        <!-- Population legend -->
+        <div id="legend_con_population" style="display: none">
+            <div class="close-btn" onclick="hideLegend()"></div>                         
+            <div id="label"><b>Population Density/sq.km.</b><br />
+                <div id="PopulationLegend">
+                    <div class="legend-entry">
+                        <div class="color-block" style="background-color: #ffffd4"></div>
+                        <span class="legend-label"><500</span>
+                    </div>
+                    <div class="legend-entry">
+                        <div class="color-block" style="background-color: #fed98e"></div>
+                        <span class="legend-label">500 - 1000</span>
+                    </div>
+                    <div class="legend-entry">
+                        <div class="color-block" style="background-color: #fe9929"></div>
+                        <span class="legend-label">1000 - 2000</span>
+                    </div>
+                    <div class="legend-entry">
+                        <div class="color-block" style="background-color: #d95f0e"></div>
+                        <span class="legend-label">2000 - 3000</span>
+                    </div>
+                    <div class="legend-entry">
+                        <div class="color-block" style="background-color: #993404"></div>
+                        <span class="legend-label">>= 3000</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<!-- Income legend -->
+<div id="legend_con_income" style="display: none">
+    <div class="close-btn" onclick="hideLegend()"></div>                         
+    <div id="label"><b>Median Household Income</b><br />
+        <div id="incomeLegend">
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #add8e6"></div>
+                <span class="legend-label"><45K</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #b0c4de"></div>
+                <span class="legend-label">45K - 64K</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #9370db"></div>
+                <span class="legend-label">65K - 86K</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #800080"></div>
+                <span class="legend-label">87K - 126K</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #4b0082"></div>
+                <span class="legend-label">>= 127K</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Road legend -->
+<div id="legend_con_road" style="display: none">
+    <div class="close-btn" onclick="hideLegend()"></div>                         
+    <div id="label"><b>Distance from Road (m)</b><br />
+        <div id="roadLegend">
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #228B22"></div>
+                <span class="legend-label"><=200</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #7CFC00"></div>
+                <span class="legend-label">200 - 400</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #FFFF00"></div>
+                <span class="legend-label">400 - 750</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #FFA500"></div>
+                <span class="legend-label">750 - 1100</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #FF0000"></div>
+                <span class="legend-label">>= 1100</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Child and Aged Population legend -->
+<div id="legend_con_childAged" style="display: none">
+    <div class="close-btn" onclick="hideLegend()"></div>                         
+    <div id="label"><b>% Child & Aged Population</b><br />
+        <div id="childAgedLegend">
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #fee5d9"></div>
+                <span class="legend-label"><=15.28</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #fcae91"></div>
+                <span class="legend-label">15.28 - 23.88</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #fb6a4a"></div>
+                <span class="legend-label">23.89 - 33.45</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #de2d26"></div>
+                <span class="legend-label">33.46 - 51.64</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #a50f15"></div>
+                <span class="legend-label">>= 51.65</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- % of Renters legend -->
+<div id="legend_con_renter" style="display: none">
+    <div class="close-btn" onclick="hideLegend()"></div>                         
+    <div id="label"><b>% Renters</b><br />
+        <div id="renterLegend">
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #fef0d9"></div>
+                <span class="legend-label"><=12.41%</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #fdcc8a"></div>
+                <span class="legend-label">12.42 - 30.01%</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #fc8d59"></div>
+                <span class="legend-label">30.02 - 46.45%</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #e34a33"></div>
+                <span class="legend-label">46.46 - 69%</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #b30000"></div>
+                <span class="legend-label">>= 70%</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DEM legend -->
+<div id="legend_con_dem" style="display: none">
+    <div class="close-btn" onclick="hideLegend()"></div>                         
+    <div id="label"><b>Elevation (m)</b><br />
+        <div id="demLegend">
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #005CE6"></div>
+                <span class="legend-label"><=220</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #AACEAC"></div>
+                <span class="legend-label">222 - 251</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #F1FB7B"></div>
+                <span class="legend-label">252 - 259</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #F7A248"></div>
+                <span class="legend-label">260 - 272</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #F0261C"></div>
+                <span class="legend-label">>= 273</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- River Drainage Density -->
+<div id="legend_con_riverdistImage" style="display: none">
+    <div class="close-btn" onclick="hideLegend()"></div>                         
+    <div id="label"><b>River Distance (m)</b><br />
+        <div id="riverdistImageLegend">
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #85C1C8"></div>
+                <span class="legend-label"><=149</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #A761AA"></div>
+                <span class="legend-label">150 - 300</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #C0182A"></div>
+                <span class="legend-label">259 - 456</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #DE6600"></div>
+                <span class="legend-label">455 - 672</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #FFFF00"></div>
+                <span class="legend-label">>= 673</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- LULC Density -->
+<div id="legend_con_lulcImageToggle" style="display: none">
+    <div class="close-btn" onclick="hideLegend()"></div>                         
+    <div id="label"><b>Landuse & Land-class</b><br />
+        <div id="lulcImageToggleLegend">
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #B2BEB5"></div>
+                <span class="legend-label">Developed/Built-up</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #FFFF00"></div>
+                <span class="legend-label">Corn</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #228B22"></div>
+                <span class="legend-label">Soybean</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #50C878"></div>
+                <span class="legend-label">Deciduous Forest</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #088F8F"></div>
+                <span class="legend-label">Water</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #C4B454"></div>
+                <span class="legend-label">Barren</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Soil Type Legend -->
+<div id="legend_con_soilImageToggle" style="display: none">
+    <div class="close-btn" onclick="hideLegend()"></div>                         
+    <div id="label"><b>Soil Type</b><br />
+        <div id="soilImageToggleLegend">
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #73CCA5"></div>
+                <span class="legend-label">Clay loam/silty clay</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #D057EC"></div>
+                <span class="legend-label">Loam</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #AE4346"></div>
+                <span class="legend-label">Sandy clay loam</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #324E86"></div>
+                <span class="legend-label">Sandy loam</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #EBD654"></div>
+                <span class="legend-label">Sand</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slope legend -->
+<div id="legend_con_slopeImageToggle" style="display: none">
+    <div class="close-btn" onclick="hideLegend()"></div>                         
+    <div id="label"><b>Slope (Deg)</b><br />
+        <div id="slopeImageToggleLegend">
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #228B22"></div>
+                <span class="legend-label"><=22</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #7CFC00"></div>
+                <span class="legend-label">22 - 49</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #FFFF00"></div>
+                <span class="legend-label">50 - 67</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #FFA500"></div>
+                <span class="legend-label">68 - 79</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #FF0000"></div>
+                <span class="legend-label">>= 80</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Physical Vulnerability legend -->
+<div id="legend_con_physicalLayer" class="hidden">
+    <div class="close-btn" onclick="hideLegend()"></div>                         
+    <div id="label"><b>Flood Susceptibility</b><br />
+        <div id="physicalLayerLegend">
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #FCFBFD"></div>
+                <span class="legend-label">Very Low</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #DADAEB"></div>
+                <span class="legend-label">Low</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #9E9AC8"></div>
+                <span class="legend-label">Moderate</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #6A51A3"></div>
+                <span class="legend-label">High</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #3F007D"></div>
+                <span class="legend-label">Very High</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Social Vulnerability legend -->
+<div id="legend_con_socialLayer" class="hidden">
+    <div class="close-btn" onclick="hideLegend()"></div>                         
+    <div id="label"><b>Flood Susceptibility</b><br />
+        <div id="socialLayerLegend">
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #FCFBFD"></div>
+                <span class="legend-label">Very Low</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #DADAEB"></div>
+                <span class="legend-label">Low</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #9E9AC8"></div>
+                <span class="legend-label">Moderate</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #6A51A3"></div>
+                <span class="legend-label">High</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #3F007D"></div>
+                <span class="legend-label">Very High</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Combined Vulnerability legend -->
+<div id="legend_con_combinedLayer" class="hidden">
+    <div class="close-btn" onclick="hideLegend()"></div>                         
+    <div id="label"><b>Flood Susceptibility</b><br />
+        <div id="combinedLayerLegend">
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #FCFBFD"></div>
+                <span class="legend-label">Very Low</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #DADAEB"></div>
+                <span class="legend-label">Low</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #9E9AC8"></div>
+                <span class="legend-label">Moderate</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #6A51A3"></div>
+                <span class="legend-label">High</span>
+            </div>
+            <div class="legend-entry">
+                <div class="color-block" style="background-color: #3F007D"></div>
+                <span class="legend-label">Very High</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <!-- Main map container -->
+        <div id="main-container">
+            <div id="map"></div>
+            <div id="inner-container" style="display: flex"; style="align-items: flex-start;">
+                <div id="wellgraph">
+                    <div class="header">
+                        <div class="header-title" style="text-align: left;">
+                            <a href="index.html">FloodRSS</a>
+                            <!-- <img src="FIM_icon.png" alt="FIM Icon" class="fim-icon"> -->
+                        </div>
+                    </div>
+                </div>
+                <div id="info-container">
+                    <div id="info-window">
+                        <div id="iw-box">
+                            <div id="iw-title" class="title"></div>
+                            <div id="iw-metadata"></div>
+                            <div id="iw-content"></div>
+                            <div id="iw-moreinfo"></div>
+                        </div>
+                    </div>
+                    <div id="drought-toggle-window" style="position: relative">
+                        <div id="ltw-drought-info">
+                            <div id="ltw-title" class="title"><span style="display: inline">Indicators</span></div>
+
+                            <label>
+                                <input type="checkbox" id="main-physical-indicators">
+                                Physical
+                            </label>
+                            <div id="additional-checkboxes" class="hidden">
+                                <label class="cbox">River Drainage Density
+                                    <input type="checkbox" id="riverdistImageToggle" name="physical-indicators"/><span class="checkmark"></span>
+                                </label>
+                                <label class="cbox">Land Use Land Class
+                                    <input type="checkbox" id="lulcImageToggle" name="physical-indicators"/><span class="checkmark"></span>
+                                </label>
+                                <label class="cbox">Soil Type
+                                    <input type="checkbox" id="soilImageToggle" name="physical-indicators"/><span class="checkmark"></span>
+                                </label>
+                                <label class="cbox">DEM
+                                    <input type="checkbox" id="demLayer" name="physical-indicators"/><span class="checkmark"></span>
+                                </label>
+                                <label class="cbox">Slope
+                                    <input type="checkbox" id="slopeImageToggle" name="physical-indicators"/><span class="checkmark"></span>
+                                </label>
+                            </div>
+
+                            <label>
+                                <input type="checkbox" id="main-socio-economic">
+                                Socio-Economic
+                            </label>
+                            <div id="socio-economic-checkboxes" class="hidden">
+                                <label class="cbox">Population Density
+                                    <input type="checkbox" id="populationLayer" name="socio-economic" onchange="toggle_populationLayer()"/><span class="checkmark"></span>
+                                </label>
+                                <label class="cbox">Income
+                                    <input type="checkbox" id="incomeLayer" name="socio-economic" onchange="toggle_incomeLayer()"/><span class="checkmark"></span>
+                                </label>
+                                <label class="cbox">Road Density
+                                    <input type="checkbox" id="roadLayer" name="socio-economic" onchange="toggle_roadLayer()"/><span class="checkmark"></span>
+                                </label>
+                                <label class="cbox">Child and Aged Population
+                                    <input type="checkbox" id="childAgedLayer" name="socio-economic" onchange="toggle_childAgedLayer()"/><span class="checkmark"></span>
+                                </label>
+                                <label class="cbox">Renters
+                                    <input type="checkbox" id="renterLayer" name="socio-economic" onchange="toggle_renterLayer()"/><span class="checkmark"></span>
+                                </label>
+                            </div>
+
+                            <!-- Display Maps Section -->
+                            <div id="map-display">
+                                <div id="map-title" class="title"><span>Vulnerability Maps</span></div>
+                                <br>
+                                <div id="map-options">
+                                    <label style="margin-top: 10px;">
+                                        <input type="checkbox" id="physicalLayer" name="physicalLayer"/>
+                                        Physical
+                                    </label>
+
+                                    <label>
+                                        <input type="checkbox" id="socialLayer" name="socialLayer"/>
+                                        Socio-Economic
+                                    </label>
+
+                                    <label>
+                                        <input type="checkbox" id="combinedLayer" name="combinedLayer"/>
+                                        Integrated
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- New Weight Setting Section -->
+                            <div id="weight-setting">
+                                <div id="weight-title" class="title"><span>Scenario Configuration</span></div>
+                                <br>
+                                <label style="margin-top: 10px;">
+                                    <input type="checkbox" id="CustomizedPhysical" name="weightOption" value="customized_physical" onchange="handleCheckboxChange(this)"/>
+                                    Physical
+                                </label>
+                                <label>
+                                    <input type="checkbox" id="CustomizedSocial" name="weightOption" value="customized_social" onchange="handleCheckboxChange(this)"/>
+                                    Socio-Economic
+                                </label>
+                                <label>
+                                    <input type="checkbox" id="CustomizedCombined" name="weightOption" value="customized_combined" onchange="handleCheckboxChange(this)"/>
+                                    Integrated
+                                </label>
+                            </div>
+                            <br>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <div id="sliderPopup" class="popup" style="display: none;">
+                    <div class="slider-container">
+                        <div id="contentPhysical" style="display: none;">
+                            <h4 class="physical-header">Physical Indicators</h4>
+                            <label for="slider_river">River Drainage Density: <span id="sliderValue1">7</span></label>
+                            <input type="range" min="0" max="10" value="7" class="slider" id="slider1" onchange="updateSliderValue(1)">
+                            <label for="slider_lulc">Land Use Land Class: <span id="sliderValue2">3</span></label>
+                            <input type="range" min="0" max="10" value="3" class="slider" id="slider2" onchange="updateSliderValue(2)">
+                            <label for="slider_soil">Soil type: <span id="sliderValue3">6</span></label>
+                            <input type="range" min="0" max="10" value="6" class="slider" id="slider3" onchange="updateSliderValue(3)">
+                            <label for="slider_dem">DEM: <span id="sliderValue4">7</span></label>
+                            <input type="range" min="0" max="10" value="7" class="slider" id="slider4" onchange="updateSliderValue(4)">
+                            <label for="slider_slope">Slope: <span id="sliderValue5">4</span></label>
+                            <input type="range" min="0" max="10" value="4" class="slider" id="slider5" onchange="updateSliderValue(5)">
+                        </div>
+                        <div id="contentSocial" style="display: none;">
+                            <h4 class="social-header">Socio-Economic Indicators</h4>
+                            <label for="slider_population">Population Density: <span id="sliderValue6">3</span></label>
+                            <input type="range" min="0" max="10" value="3" class="slider" id="slider6" onchange="updateSliderValue(6)">
+                            <label for="slider_income">Income: <span id="sliderValue7">7</span></label>
+                            <input type="range" min="0" max="10" value="7" class="slider" id="slider7" onchange="updateSliderValue(7)">
+                            <label for="slider_road">Road Distance: <span id="sliderValue8">9</span></label>
+                            <input type="range" min="0" max="10" value="9" class="slider" id="slider8" onchange="updateSliderValue(8)">
+                            <label for="slider_aged">Child and Aged Population: <span id="sliderValue9">5</span></label>
+                            <input type="range" min="0" max="10" value="5" class="slider" id="slider9" onchange="updateSliderValue(9)">
+                            <label for="slider_renters">Renters: <span id="sliderValue10">7</span></label>
+                            <input type="range" min="0" max="10" value="7" class="slider" id="slider10" onchange="updateSliderValue(10)">
+                        </div>
+                        <div id="contentCombined" style="display: none;">
+                            <h4 class="physical-header">Physical Indicators</h4>
+                            <label for="slider_river_combined">River Drainage Density: <span id="sliderValue11">7</span></label>
+                            <input type="range" min="0" max="10" value="7" class="slider" id="slider11" onchange="updateSliderValue(11)">
+                            <label for="slider_lulc_combined">Land Use Land Class: <span id="sliderValue12">3</span></label>
+                            <input type="range" min="0" max="10" value="3" class="slider" id="slider12" onchange="updateSliderValue(12)">
+                            <label for="slider_soil_combined">Soil type: <span id="sliderValue13">6</span></label>
+                            <input type="range" min="0" max="10" value="6" class="slider" id="slider13" onchange="updateSliderValue(13)">
+                            <label for="slider_dem_combined">DEM: <span id="sliderValue14">7</span></label>
+                            <input type="range" min="0" max="10" value="7" class="slider" id="slider14" onchange="updateSliderValue(14)">
+                            <label for="slider_slope_combined">Slope: <span id="sliderValue15">4</span></label>
+                            <input type="range" min="0" max="10" value="4" class="slider" id="slider15" onchange="updateSliderValue(15)">
+                            <h4 class="social-header">Socio-Economic Indicators</h4>
+                            <label for="slider_population_combined">Population Density: <span id="sliderValue16">3</span></label>
+                            <input type="range" min="0" max="10" value="3" class="slider" id="slider16" onchange="updateSliderValue(16)">
+                            <label for="slider_income_combined">Income: <span id="sliderValue17">7</span></label>
+                            <input type="range" min="0" max="10" value="7" class="slider" id="slider17" onchange="updateSliderValue(17)">
+                            <label for="slider_road_combined">Road Distance: <span id="sliderValue18">9</span></label>
+                            <input type="range" min="0" max="10" value="9" class="slider" id="slider18" onchange="updateSliderValue(18)">
+                            <label for="slider_aged_combined">Child and Aged Population: <span id="sliderValue19">5</span></label>
+                            <input type="range" min="0" max="10" value="5" class="slider" id="slider19" onchange="updateSliderValue(19)">
+                            <label for="slider_renters_combined">Renters: <span id="sliderValue20">7</span></label>
+                            <input type="range" min="0" max="10" value="7" class="slider" id="slider20" onchange="updateSliderValue(20)">
+                        </div>
+<button id="calculate-button" class="title-button" onclick="calculateCombinedResult()">
+  <span>Update Map</span>
+</button>
+
+                    </div>
+                </div>
+
+                <div class="uihi-logo">
+                    <a href="https://hydroinformatics.uiowa.edu/" target="_blank"><img src="images/uihi_logo.png"/></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sliderInfoBox"></div>
+
+
+    <script>
+        // Suppress tracking prevention warnings (these are browser privacy features, not errors)
+        const originalWarn = console.warn;
+        console.warn = function(...args) {
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('Tracking Prevention')) {
+                return; // Suppress tracking prevention warnings
+            }
+            originalWarn.apply(console, args);
+        };
+
+        function loadPage(page) {
+            // If loading index.html (home), reload the page to reinitialize everything
+            if (page === 'index.html' || page.includes('index')) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Hide the map container and related elements when loading non-map pages
+            const mainContainer = document.getElementById('main-container');
+            if (mainContainer) {
+                mainContainer.style.display = 'none';
+            }
+            
+            // Hide all legend containers
+            const legendContainers = document.querySelectorAll('[id^="legend_con_"]');
+            legendContainers.forEach(legend => {
+                legend.style.display = 'none';
+            });
+            
+            // Clean up previously injected styles from other pages
+            const oldStyles = document.querySelectorAll('style[id^="style-"]');
+            oldStyles.forEach(style => {
+                if (!style.id.includes(page.replace(/\//g, '-'))) {
+                    style.remove();
+                }
+            });
+            
+            // Clear any active map layers before loading new content
+            if (typeof window.map !== 'undefined' && window.map) {
+                // Clear all data layers
+                if (window.map.data) {
+                    window.map.data.forEach(function(feature) {
+                        window.map.data.remove(feature);
+                    });
+                }
+            }
+            
+            fetch(page)
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return res.text();
+                })
+                .then(html => {
+                    // Extract body content and scripts from the loaded HTML
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    
+                    // Extract and inject styles from <style> tags in head
+                    const styleTags = doc.head.querySelectorAll('style');
+                    styleTags.forEach(styleTag => {
+                        const styleId = `style-${page.replace(/\//g, '-')}`;
+                        // Remove old style if exists
+                        const oldStyle = document.getElementById(styleId);
+                        if (oldStyle) {
+                            oldStyle.remove();
+                        }
+                        const newStyle = document.createElement('style');
+                        newStyle.id = styleId;
+                        newStyle.textContent = styleTag.textContent;
+                        document.head.appendChild(newStyle);
+                    });
+                    
+                    // Load external CSS links from head (skip if already loaded)
+                    const cssLinks = doc.head.querySelectorAll('link[rel="stylesheet"]');
+                    cssLinks.forEach(link => {
+                        const href = link.getAttribute('href');
+                        if (href && !href.startsWith('http')) {
+                            // Check if this CSS is already loaded (by href or by filename)
+                            const hrefFilename = href.split('/').pop();
+                            const existingLink = document.querySelector(`link[href="${href}"], link[href*="${hrefFilename}"]`);
+                            
+                            if (!existingLink) {
+                                // Adjust path if needed (for services folder)
+                                let adjustedHref = href;
+                                if (page.startsWith('services/') && !href.startsWith('../')) {
+                                    adjustedHref = '../' + href;
+                                } else if (!page.startsWith('services/') && href.startsWith('../')) {
+                                    adjustedHref = href.replace('../', '');
+                                }
+                                const newLink = document.createElement('link');
+                                newLink.rel = 'stylesheet';
+                                newLink.href = adjustedHref;
+                                document.head.appendChild(newLink);
+                            }
+                        }
+                    });
+                    
+                    // Load external scripts from head first (like Google Charts)
+                    const headScripts = doc.head.querySelectorAll('script[src]');
+                    const scriptPromises = [];
+                    headScripts.forEach(oldScript => {
+                        const src = oldScript.getAttribute('src');
+                        if (src && !src.startsWith('http') && !document.querySelector(`script[src="${src}"]`)) {
+                            // Adjust path if needed
+                            let adjustedSrc = src;
+                            if (page.startsWith('services/') && !src.startsWith('../') && !src.startsWith('http')) {
+                                adjustedSrc = '../' + src;
+                            } else if (!page.startsWith('services/') && src.startsWith('../')) {
+                                adjustedSrc = src.replace('../', '');
+                            }
+                            const newScript = document.createElement('script');
+                            newScript.src = adjustedSrc;
+                            scriptPromises.push(new Promise((resolve, reject) => {
+                                newScript.onload = resolve;
+                                newScript.onerror = reject;
+                                document.head.appendChild(newScript);
+                            }));
+                        } else if (src && src.startsWith('http')) {
+                            // External scripts (like CDN)
+                            if (!document.querySelector(`script[src="${src}"]`)) {
+                                const newScript = document.createElement('script');
+                                newScript.src = src;
+                                scriptPromises.push(new Promise((resolve, reject) => {
+                                    newScript.onload = resolve;
+                                    newScript.onerror = reject;
+                                    document.head.appendChild(newScript);
+                                }));
+                            }
+                        }
+                    });
+                    
+                    // Get body content (excluding menu and footer if they exist)
+                    const bodyContent = doc.body;
+                    let contentHTML = '';
+                    
+                    // Extract content, excluding menu and footer
+                    Array.from(bodyContent.children).forEach(child => {
+                        // Skip menu, footer, and script elements
+                        if (!child.classList.contains('menu') && 
+                            !child.classList.contains('footer') &&
+                            child.id !== 'menu' &&
+                            child.tagName !== 'SCRIPT') {
+                            contentHTML += child.outerHTML;
+                        }
+                    });
+                    
+                    // If no content was extracted, try getting all body content and filtering
+                    if (!contentHTML.trim()) {
+                        // Create a temporary container to parse and filter
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = bodyContent.innerHTML;
+                        // Remove menu and footer elements
+                        const menuEl = tempDiv.querySelector('.menu, #menu');
+                        const footerEl = tempDiv.querySelector('.footer');
+                        const scripts = tempDiv.querySelectorAll('script');
+                        if (menuEl) menuEl.remove();
+                        if (footerEl) footerEl.remove();
+                        scripts.forEach(s => s.remove());
+                        contentHTML = tempDiv.innerHTML;
+                    }
+                    
+                    // Clear main-content and insert new content
+                    const mainContentDiv = document.getElementById("main-content");
+                    if (!mainContentDiv) {
+                        console.error('main-content div not found!');
+                        return;
+                    }
+                    
+                    // First, hide map-related elements if they exist
+                    const mapContainer = mainContentDiv.querySelector('#main-container');
+                    if (mapContainer) {
+                        mapContainer.style.display = 'none';
+                    }
+                    const legendContainers = mainContentDiv.querySelectorAll('[id^="legend_con_"]');
+                    legendContainers.forEach(legend => {
+                        legend.style.display = 'none';
+                    });
+                    
+                    // Fix image paths in contentHTML - adjust relative paths
+                    // When loading services/*.html from root, paths with ../ need to be adjusted
+                    // because the HTML is being inserted into root page, not the services page
+                    if (page.startsWith('services/')) {
+                        // Loading from services folder into root - remove ../ from paths
+                        contentHTML = contentHTML.replace(/src="\.\.\//g, 'src="');
+                        contentHTML = contentHTML.replace(/href="\.\.\//g, 'href="');
+                    }
+                    
+                    // Then replace content
+                    if (!contentHTML.trim()) {
+                        console.error('No content extracted from', page);
+                        console.log('Body content HTML:', bodyContent.innerHTML.substring(0, 200));
+                        mainContentDiv.innerHTML = '<div style="padding: 20px; text-align: center;"><h2>Error</h2><p>Could not load the page content.</p></div>';
+                    } else {
+                        // Clear the main-content completely first
+                        mainContentDiv.innerHTML = '';
+                        // Then insert new content
+                        mainContentDiv.innerHTML = contentHTML;
+                        // Ensure main-content is visible and positioned correctly
+                        mainContentDiv.style.display = 'block';
+                        mainContentDiv.style.position = 'relative';
+                        // Scroll to top after loading
+                        window.scrollTo(0, 0);
+                    }
+                    
+                    // Wait for external scripts to load, then execute inline scripts
+                    Promise.all(scriptPromises).then(() => {
+                        // Extract and execute inline scripts after a short delay
+                        setTimeout(() => {
+                            const scripts = doc.querySelectorAll('script:not([src])');
+                            scripts.forEach(oldScript => {
+                                const scriptText = oldScript.textContent;
+                                if (scriptText) {
+                                    // Execute script in global scope
+                                    try {
+                                        const func = new Function(scriptText);
+                                        func();
+                                    } catch (e) {
+                                        console.error('Error executing script:', e);
+                                        // Fallback: append as script element
+                                        const newScript = document.createElement('script');
+                                        newScript.textContent = scriptText;
+                                        document.body.appendChild(newScript);
+                                    }
+                                }
+                            });
+                            
+                        // Special handling for stat.html
+                        const pageName = page.split('/').pop(); // Get filename from path
+                        if (pageName === 'stat.html') {
+                                // Wait a bit for scripts to execute, then initialize
+                                setTimeout(() => {
+                                    // Check if Google Charts is loaded and initializeChart exists
+                                    if (typeof google !== 'undefined' && google.charts && typeof initializeChart === 'function') {
+                                        // Charts already loaded, call initializeChart directly
+                                        initializeChart();
+                                    } else if (typeof google !== 'undefined' && google.charts) {
+                                        // Charts loaded but initializeChart not ready yet, wait a bit more
+                                        setTimeout(() => {
+                                            if (typeof initializeChart === 'function') {
+                                                initializeChart();
+                                            }
+                                        }, 300);
+                                    }
+                                }, 300);
+                            }
+                        }, 100);
+                    }).catch(err => {
+                        console.error('Error loading external scripts:', err);
+                        // Still try to execute inline scripts even if external scripts fail
+                        setTimeout(() => {
+                            const scripts = doc.querySelectorAll('script:not([src])');
+                            scripts.forEach(oldScript => {
+                                const newScript = document.createElement('script');
+                                const scriptText = oldScript.textContent;
+                                if (scriptText) {
+                                    newScript.textContent = scriptText;
+                                    document.body.appendChild(newScript);
+                                }
+                            });
+                        }, 100);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading page:', error);
+                    document.getElementById("main-content").innerHTML = '<div style="padding: 20px; text-align: center;"><h2>Error</h2><p>Could not load the page. Please check if the file exists.</p></div>';
+                });
+        }
+        
+        // Ensure map is reinitialized when page loads or returns to home
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if we're on the home page and map needs initialization
+            const mapDiv = document.getElementById('map');
+            if (mapDiv && typeof google !== 'undefined' && google.maps) {
+                // Wait a bit for Google Maps API to fully load
+                setTimeout(function() {
+                    if (typeof initMap === 'function') {
+                        // Check if map is already initialized - just check if window.map exists
+                        if (!window.map) {
+                            initMap();
+                        }
+                    }
+                }, 500);
+            }
+        });
+        // === Hover-based info for sliders ===
+const sliderDescriptions = {
+  slider1: {
+    title: "River Drainage Density",
+    desc: "1 = Low drainage density (fewer channels, lower flood risk).<br>10 = Dense drainage network (higher flood risk)."
+  },
+  slider2: {
+    title: "Land Use Land Class",
+    desc: "1 = Vegetation/forest cover (absorbs water).<br>10 = Built-up/impervious (increases runoff)."
+  },
+  slider3: {
+    title: "Soil Type",
+    desc: "1 = Sandy or permeable (good infiltration).<br>10 = Clay or compact (poor infiltration)."
+  },
+  slider4: {
+    title: "DEM (Elevation)",
+    desc: "1 = High elevation (low flood risk).<br>10 = Low elevation (high flood risk)."
+  },
+  slider5: {
+    title: "Slope",
+    desc: "1 = Steep slope (quick runoff).<br>10 = Flat surface (water accumulates)."
+  },
+  slider6: {
+    title: "Population Density",
+    desc: "1 = Sparse population (low exposure).<br>10 = Dense population (high exposure)."
+  },
+  slider7: {
+    title: "Income",
+    desc: "1 = Higher income (better resilience).<br>10 = Lower income (more vulnerability)."
+  },
+  slider8: {
+    title: "Road Distance",
+    desc: "1 = Far from roads (poor access).<br>10 = Close to roads (better access but higher exposure)."
+  },
+  slider9: {
+    title: "Child & Aged Population",
+    desc: "1 = Few dependents.<br>10 = Many dependents (more vulnerability)."
+  },
+  slider10: {
+    title: "Renters",
+    desc: "1 = Fewer renters (stable housing).<br>10 = Many renters (transient housing, higher risk)."
+  }
+};
+
+function attachSliderHoverEffects() {
+  const infoBox = document.getElementById("sliderInfoBox");
+  const sliders = document.querySelectorAll(".slider");
+
+  sliders.forEach(slider => {
+    slider.addEventListener("mouseenter", () => {
+      const data = sliderDescriptions[slider.id];
+      if (data) {
+        infoBox.innerHTML = `<h4>${data.title}</h4><p>${data.desc}</p>`;
+        infoBox.style.display = "block";
+        infoBox.style.opacity = "1";
+      }
+    });
+    slider.addEventListener("mouseleave", () => {
+      infoBox.style.display = "none";
+      infoBox.style.opacity = "0";
+    });
+  });
+}
+
+document.addEventListener("DOMContentLoaded", attachSliderHoverEffects);
+
+    </script>
+</body>
+</html>
