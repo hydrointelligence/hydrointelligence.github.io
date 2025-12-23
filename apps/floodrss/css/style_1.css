@@ -1003,6 +1003,18 @@ label {
 .uihi-logo img {
   width: 78px;
   height: 69px;
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+  cursor: pointer;
+}
+
+.uihi-logo img:hover,
+.uihi-logo img:active {
+  opacity: 1;
+}
+
+.uihi-logo a {
+  display: inline-block;
 }
 
 /* Hide the "Keyboard Shortcuts", "Terms of Use", and "Report a problem" buttons */
